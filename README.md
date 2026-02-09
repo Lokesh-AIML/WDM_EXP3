@@ -39,97 +39,222 @@ for each wear category.</p>
 ### Program:
 
 ```python
-from collections import defaultdict
+ffrom collections import defaultdict
 from itertools import combinations
+
 # Function to generate candidate k-item sequences
 def generate_candidates(dataset, k):
+  c = defaultdict(int)
+  result = {}
+  for seq in dataset:
+    for comb in combinations(seq , k):
+      c[comb] += 1
+  for item , sup in c.items():
+    if sup >= min_support:
+      result[item] = sup
+  return result
 
-
-    /WRITE YOUR CODE HERE/
-
-
-#Function to perform GSP algorithm
+# Function to perform GSP algorithm
 def gsp(dataset, min_support):
+  c = defaultdict(int)
+  fp = defaultdict(int)
+  k = 1
+  while True:
+    c = generate_candidates(dataset , k)
+    if not c:
+      break
+    fp.update(c)
+    k += 1
+  return fp;
 
 
-  /WRITE YOUR CODE HERE/
-
-
-#Example dataset for each category
-top_wear_data = [
- ["blouse", "t-shirt", "tank_top"],
- ["hoodie", "sweater", "top"],["hoodie"],["hoodie","sweater"]
- #Add more sequences for top wear
+# Example dataset for each category
+dataset = [
+    ['a' , 'b' , 'c' , 'b' , 'e' , 'c' , 'f' , 'g' , 'a' , 'b' , 'e'] ,
+    ['a' , 'd' , 'b' , 'c' , 'c' , 'f' , 'g' , 'c', 'h'] ,
+    ['b' , 'c' , 'a' , 'd', 'e' , 'b' , 'f' ,'c' , 'd' , 'f' , 'g' , 'h'] ,
+    ['c' , 'e' , 'c' , 'e' , 'c']
 ]
-bottom_wear_data = [
- ["jeans", "trousers", "shorts"],
- ["leggings", "skirt", "chinos"],
- # Add more sequences for bottom wear
-]
-party_wear_data = [
- ["cocktail_dress", "evening_gown", "blazer"],
- ["party_dress", "formal_dress", "suit"],
- ["party_dress", "formal_dress", "suit"],
- ["party_dress", "formal_dress", "suit"],
- ["party_dress", "formal_dress", "suit"],
- ["party_dress"],["party_dress"],
- # Add more sequences for party wear
-]
-#Minimum support threshold
-min_support = 2
-#Perform GSP algorithm for each category
-top_wear_result = gsp(top_wear_data, min_support)
-bottom_wear_result = gsp(bottom_wear_data, min_support)
-party_wear_result = gsp(party_wear_data, min_support)
-#Output the frequent sequential patterns for each category
-print("Frequent Sequential Patterns - Top Wear:")
-if top_wear_result:
- for pattern, support in top_wear_result.items():
- print(f"Pattern: {pattern}, Support: {support}")
-else:
- print("No frequent sequential patterns found in Top Wear.")
-print("\nFrequent Sequential Patterns - Bottom Wear:")
-if bottom_wear_result:
- for pattern, support in bottom_wear_result.items():
- print(f"Pattern: {pattern}, Support: {support}")
-else:
- print("No frequent sequential patterns found in Bottom Wear.")
-print("\nFrequent Sequential Patterns - Party Wear:")
-if party_wear_result:
- for pattern, support in party_wear_result.items():
- print(f"Pattern: {pattern}, Support: {support}")
-else:
- print("No frequent sequential patterns found in Party Wear.")
+
+# Minimum support threshold
+min_support = 4
+
+# Perform GSP algorithm for each category
+dataset_result = gsp(dataset, min_support)
+
+# Output the frequent sequential patterns for each category
+grouped = defaultdict(list)
+for pattern, support in dataset_result.items():
+    grouped[len(pattern)].append((pattern, support))
+
+# Print tables
+for length in sorted(grouped.keys()):
+    print(f"\nFrequent Sequential Patterns of length {length}\n")
+    print("{:<25} {:<10}".format("Pattern", "Support"))
+    print("-" * 35)
+
+    for pattern, support in grouped[length]:
+        print("{:<25} {:<10}".format(str(pattern), support))
+
 ```
 ### Output:
+
+```
+Frequent Sequential Patterns of length 1
+
+Pattern                   Support   
+-----------------------------------
+('a',)                    4         
+('b',)                    6         
+('c',)                    10        
+('e',)                    5         
+('f',)                    4         
+
+Frequent Sequential Patterns of length 2
+
+Pattern                   Support   
+-----------------------------------
+('a', 'b')                6         
+('a', 'c')                6         
+('a', 'e')                4         
+('a', 'f')                4         
+('b', 'c')                9         
+('b', 'b')                4         
+('b', 'e')                6         
+('b', 'f')                7         
+('b', 'g')                5         
+('c', 'b')                4         
+('c', 'e')                7         
+('c', 'c')                8         
+('c', 'f')                7         
+('c', 'g')                6         
+('e', 'c')                5         
+('f', 'g')                4         
+('d', 'c')                4         
+('d', 'f')                4         
+('c', 'h')                5         
+
+Frequent Sequential Patterns of length 3
+
+Pattern                   Support   
+-----------------------------------
+('a', 'b', 'c')           7         
+('a', 'b', 'e')           6         
+('a', 'b', 'f')           5         
+('a', 'b', 'g')           4         
+('a', 'c', 'c')           4         
+('a', 'c', 'f')           5         
+('a', 'c', 'g')           5         
+('a', 'f', 'g')           4         
+('b', 'c', 'b')           5         
+('b', 'c', 'e')           5         
+('b', 'c', 'c')           5         
+('b', 'c', 'f')           9         
+('b', 'c', 'g')           8         
+('b', 'c', 'a')           4         
+('b', 'b', 'e')           4         
+('b', 'e', 'f')           4         
+('b', 'f', 'g')           7         
+('c', 'b', 'e')           4         
+('c', 'e', 'c')           6         
+('c', 'f', 'g')           7         
+('a', 'd', 'c')           4         
+('a', 'd', 'f')           4         
+('a', 'c', 'h')           4         
+('d', 'b', 'c')           4         
+('d', 'c', 'h')           4         
+('d', 'f', 'g')           4         
+('d', 'f', 'h')           4         
+('b', 'c', 'h')           6         
+('b', 'f', 'h')           5         
+('c', 'c', 'h')           4         
+('c', 'f', 'h')           5         
+('c', 'g', 'h')           4         
+('b', 'c', 'd')           4         
+('b', 'd', 'f')           4         
+('c', 'd', 'f')           4         
+
+Frequent Sequential Patterns of length 4
+
+Pattern                   Support   
+-----------------------------------
+('a', 'b', 'c', 'b')      4         
+('a', 'b', 'c', 'e')      4         
+('a', 'b', 'c', 'c')      4         
+('a', 'b', 'c', 'f')      6         
+('a', 'b', 'c', 'g')      6         
+('a', 'b', 'b', 'e')      4         
+('a', 'b', 'f', 'g')      5         
+('a', 'c', 'b', 'e')      4         
+('a', 'c', 'f', 'g')      5         
+('b', 'c', 'b', 'e')      5         
+('b', 'c', 'f', 'g')      9         
+('b', 'c', 'a', 'b')      4         
+('b', 'c', 'a', 'e')      4         
+('b', 'e', 'f', 'g')      4         
+('a', 'd', 'b', 'c')      4         
+('a', 'd', 'c', 'h')      4         
+('a', 'd', 'f', 'g')      4         
+('a', 'd', 'f', 'h')      4         
+('a', 'b', 'c', 'h')      4         
+('d', 'b', 'c', 'h')      4         
+('d', 'f', 'g', 'h')      4         
+('b', 'c', 'c', 'h')      4         
+('b', 'c', 'f', 'h')      6         
+('b', 'c', 'g', 'h')      5         
+('b', 'f', 'g', 'h')      5         
+('c', 'f', 'g', 'h')      5         
+('b', 'c', 'd', 'f')      5         
+('b', 'c', 'd', 'g')      4         
+('b', 'c', 'd', 'h')      4         
+('b', 'd', 'f', 'g')      4         
+('b', 'd', 'f', 'h')      4         
+('c', 'd', 'f', 'g')      4         
+('c', 'd', 'f', 'h')      4         
+
+Frequent Sequential Patterns of length 5
+
+Pattern                   Support   
+-----------------------------------
+('a', 'b', 'c', 'b', 'e') 5         
+('a', 'b', 'c', 'f', 'g') 6         
+('a', 'd', 'b', 'c', 'h') 4         
+('a', 'd', 'f', 'g', 'h') 4         
+('b', 'c', 'f', 'g', 'h') 6         
+('b', 'c', 'd', 'f', 'g') 5         
+('b', 'c', 'd', 'f', 'h') 5         
+('b', 'c', 'd', 'g', 'h') 4         
+('b', 'd', 'f', 'g', 'h') 4         
+('c', 'd', 'f', 'g', 'h') 4         
+
+Frequent Sequential Patterns of length 6
+
+Pattern                   Support   
+-----------------------------------
+('b', 'c', 'd', 'f', 'g', 'h') 5         
+```
 
 ### Visualization:
 ```python
-import matplotlib.pyplot as plt
+import matplotlib.pylot as plt
+patterns = []
+supports = []
 
-# Function to visualize frequent sequential patterns with a line plot
-def visualize_patterns_line(result, category):
-    if result:
-        patterns = list(result.keys())
-        support = list(result.values())
+for pattern, support in dataset_result.items():
+    patterns.append(str(pattern))
+    supports.append(support)
 
-        plt.figure(figsize=(10, 6))
-        plt.plot([str(pattern) for pattern in patterns], support, marker='o', linestyle='-', color='blue')
-        plt.xlabel('Patterns')
-        plt.ylabel('Support Count')
-        plt.title(f'Frequent Sequential Patterns - {category}')
-        plt.xticks(rotation=90)
-        plt.tight_layout()
-        plt.show()
-    else:
-        print(f"No frequent sequential patterns found in {category}.")
-
-# Visualize frequent sequential patterns for each category using a line plot
-visualize_patterns_line(top_wear_result, 'Top Wear')
-visualize_patterns_line(bottom_wear_result, 'Bottom Wear')
-visualize_patterns_line(party_wear_result, 'Party Wear')
-```
+plt.figure()
+plt.plot(patterns, supports, marker='o')
+plt.xlabel("Patterns")
+plt.ylabel("Support Count")
+plt.title("Frequent Sequential Patterns")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
 ### Output:
 
 
+
 ### Result:
+Therefore , the implementation of gsp algoritm in python is completed successfully.
